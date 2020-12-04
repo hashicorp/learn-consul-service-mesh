@@ -1,0 +1,33 @@
+version: "3.3"
+services:
+
+  # Define api v2 service and envoy sidecar proxy
+  # with error toggle disabled
+  api_v2:
+    image: nicholasjackson/fake-service:v0.19.1
+    environment:
+      LISTEN_ADDR: 0.0.0.0:9092
+      MESSAGE: "Hello World"
+      NAME: "api-v2"
+      SERVER_TYPE: "http"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.5
+  api_v2_proxy:
+    image: joatmon08/consul-envoy:v1.9.0-v1.16.0
+    restart: always
+    environment:
+      CONSUL_HTTP_ADDR: 10.5.0.2:8500
+      CONSUL_GRPC_ADDR: 10.5.0.2:8502
+      SERVICE_CONFIG: /config/api-v2.hcl
+      CENTRAL_CONFIG_DIR: /central_config
+    volumes:
+      - "./service_config:/config"
+      - "./central_config:/central_config"
+    command: ["consul", "connect", "envoy","-sidecar-for", "api-v2"]
+    network_mode: "service:api_v2"
+
+networks:
+  vpcbr:
+    external:
+      name: learn-consul-service-mesh_vpcbr
