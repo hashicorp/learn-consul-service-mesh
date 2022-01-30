@@ -14,7 +14,7 @@ services:
 
   # Define web service and envoy sidecar proxy
   web:
-    image: nicholasjackson/fake-service:v0.19.1
+    image: nicholasjackson/fake-service:v0.23.1
     environment:
       LISTEN_ADDR: 0.0.0.0:9091
       UPSTREAM_URIS: "http://localhost:9092"
@@ -22,12 +22,12 @@ services:
       NAME: "web"
       SERVER_TYPE: "http"
     ports:
-    - "9091:9091"
+      - "9091:9091"
     networks:
       vpcbr:
         ipv4_address: 10.5.0.3
   web_proxy:
-    image: joatmon08/consul-envoy:v1.9.0-v1.16.0
+    image: nicholasjackson/consul-envoy:v1.9.2-v1.16.0
     restart: always
     environment:
       CONSUL_HTTP_ADDR: 10.5.0.2:8500
@@ -37,12 +37,12 @@ services:
     volumes:
       - "./service_config:/config"
       - "./central_config:/central_config"
-    command: ["consul", "connect", "envoy","-sidecar-for", "web"]
+    command: ["consul", "connect", "envoy", "-sidecar-for", "web"]
     network_mode: "service:web"
 
   # Define api v1 service and envoy sidecar proxy
   api_v1:
-    image: nicholasjackson/fake-service:v0.19.1
+    image: nicholasjackson/fake-service:v0.23.1
     environment:
       LISTEN_ADDR: 0.0.0.0:9092
       MESSAGE: "Hello World"
@@ -52,7 +52,7 @@ services:
       vpcbr:
         ipv4_address: 10.5.0.4
   api_v1_proxy:
-    image: joatmon08/consul-envoy:v1.9.0-v1.16.0
+    image: nicholasjackson/consul-envoy:v1.9.2-v1.16.0
     restart: always
     environment:
       CONSUL_HTTP_ADDR: 10.5.0.2:8500
@@ -62,7 +62,7 @@ services:
     volumes:
       - "./service_config:/config"
       - "./central_config:/central_config"
-    command: ["consul", "connect", "envoy","-sidecar-for", "api-v1"]
+    command: ["consul", "connect", "envoy", "-sidecar-for", "api-v1"]
     network_mode: "service:api_v1"
 
   prometheus:
