@@ -7,19 +7,19 @@ services:
   # Define api v2 service and envoy sidecar proxy
   # with error toggle enabled
   api_v2:
-    image: nicholasjackson/fake-service:v0.19.1
+    image: nicholasjackson/fake-service:v0.23.1
     environment:
       LISTEN_ADDR: 0.0.0.0:9092
       MESSAGE: "Hello World"
       NAME: "api-v2"
       SERVER_TYPE: "http"
       ERROR_RATE: 0.90
-      ERROR_DELAY: '1s'
+      ERROR_DELAY: "1s"
     networks:
       vpcbr:
         ipv4_address: 10.5.0.5
   api_v2_proxy:
-    image: joatmon08/consul-envoy:v1.9.0-v1.16.0
+    image: nicholasjackson/consul-envoy:v1.9.2-v1.16.0
     restart: always
     environment:
       CONSUL_HTTP_ADDR: 10.5.0.2:8500
@@ -29,7 +29,7 @@ services:
     volumes:
       - "./service_config:/config"
       - "./central_config:/central_config"
-    command: ["consul", "connect", "envoy","-sidecar-for", "api-v2"]
+    command: ["consul", "connect", "envoy", "-sidecar-for", "api-v2"]
     network_mode: "service:api_v2"
 
 networks:
